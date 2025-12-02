@@ -5,11 +5,11 @@
         <div class="flex justify-between items-center mb-8">
           <div class="flex-1 flex justify-start">
             <router-link
-              to="/search"
+              to="/wizard/step1"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border hover:bg-accent transition-colors text-sm font-medium"
             >
               <Search class="h-4 w-4" />
-              Find Subcontractors
+              Create Subcontractor
             </router-link>
           </div>
           <div class="text-center flex-1">

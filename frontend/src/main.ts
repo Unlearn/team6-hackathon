@@ -14,6 +14,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      redirect: '/search'
+    },
+    {
+      path: '/wizard',
       redirect: '/wizard/step1'
     },
     {
