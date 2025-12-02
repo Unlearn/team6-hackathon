@@ -31,6 +31,19 @@ class SiteController extends AbstractController
             return $trade->getName();
         }, $subcontractor->getTrades()->toArray());
 
+        $employees = array_map(function($employee) use ($subcontractor) {
+            return [
+                'id' => $employee->getId(),
+                'name' => $employee->getName(),
+                'jobTitle' => $employee->getJobTitle(),
+                'mobile' => $employee->getMobile(),
+                'email' => $employee->getEmail(),
+                'profilePicture' => $employee->getProfilePicture(),
+                'isMainContact' => $subcontractor->getMainContactEmployee() && 
+                                   $subcontractor->getMainContactEmployee()->getId() === $employee->getId()
+            ];
+        }, $subcontractor->getEmployees()->toArray());
+
         return $this->json([
             'success' => true,
             'site' => [
@@ -39,7 +52,7 @@ class SiteController extends AbstractController
                 'mobile' => $subcontractor->getMobile(),
                 'email' => $subcontractor->getEmail(),
                 'trades' => $trades,
-                'employees' => $subcontractor->getEmployees() ?? [],
+                'employees' => $employees,
                 'documents' => $subcontractor->getDocuments() ?? []
             ]
         ]);

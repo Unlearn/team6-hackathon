@@ -4,8 +4,8 @@
       <CardHeader class="space-y-6 pb-8">
         <div class="space-y-3">
           <div class="flex items-center justify-between text-sm text-muted-foreground mb-2">
-            <span class="font-medium">Step 1 of 5</span>
-            <span class="font-medium">20% Complete</span>
+            <span class="font-medium">Step 1 of 4</span>
+            <span class="font-medium">25% Complete</span>
           </div>
           <Progress :model-value="20" class="h-3" />
         </div>
@@ -246,7 +246,7 @@ const handleSubmit = async () => {
       logo: logoToSave,
       logoOriginalName: logoFile.value ? logoFile.value.name : existingOriginalName
     }))
-    // Navigate to step 2 immediately
+    // Navigate to step 2 (team members) immediately
     router.push('/wizard/step2')
   } catch (error: any) {
     if (error.response?.data?.errors) {
