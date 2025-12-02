@@ -5,11 +5,20 @@
         <div class="flex justify-between items-center mb-8">
           <div class="flex-1 flex justify-start">
             <router-link
+              v-if="isSearchPage"
               to="/wizard/step1"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border hover:bg-accent transition-colors text-sm font-medium"
             >
-              <Search class="h-4 w-4" />
+              <Plus class="h-4 w-4" />
               Create Subcontractor
+            </router-link>
+            <router-link
+              v-else-if="isWizardPage"
+              to="/search"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border hover:bg-accent transition-colors text-sm font-medium"
+            >
+              <Search class="h-4 w-4" />
+              Search Subcontractors
             </router-link>
           </div>
           <div class="text-center flex-1">
@@ -33,7 +42,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Search } from 'lucide-vue-next'
+import { Plus, Search } from 'lucide-vue-next'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -41,6 +50,8 @@ const route = useRoute()
 const { theme, initTheme } = useTheme()
 
 const isGeneratedSite = computed(() => route.path.startsWith('/site/'))
+const isWizardPage = computed(() => route.path.startsWith('/wizard'))
+const isSearchPage = computed(() => route.path === '/search')
 
 onMounted(() => {
   initTheme()
