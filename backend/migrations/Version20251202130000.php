@@ -60,6 +60,7 @@ final class Version20251202130000 extends AbstractMigration
         ];
 
         $lastNames = ['Wilson', 'Brown', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen'];
+        $profilePictures = ['andy.png', 'charlie.png', 'clea.jpg', 'dan.jpg', 'james.jpg', 'reegan.jpg', 'vari.jpg'];
 
         foreach ($subcontractors as $index => $sub) {
             // Generate slug from name
@@ -89,15 +90,17 @@ final class Version20251202130000 extends AbstractMigration
                 $empName = $emp['name'] . ' ' . $lastName;
                 $empEmail = strtolower($emp['name']) . '.' . strtolower($lastName) . '@' . str_replace(['Pty Ltd', ' ', '&'], ['', '', ''], strtolower($sub['name'])) . '.com.au';
                 $empMobile = '04' . str_pad((string)(($index * 3 + $empIndex) * 11111111 % 100000000), 8, '0', STR_PAD_LEFT);
+                $profilePicture = $profilePictures[($index * 3 + $empIndex) % count($profilePictures)];
 
                 $this->addSql(
-                    "INSERT INTO employees (subcontractor_id, name, job_title, mobile, email, created_at, updated_at) VALUES (:subcontractor_id, :name, :job_title, :mobile, :email, :created_at, :updated_at)",
+                    "INSERT INTO employees (subcontractor_id, name, job_title, mobile, email, profile_picture, created_at, updated_at) VALUES (:subcontractor_id, :name, :job_title, :mobile, :email, :profile_picture, :created_at, :updated_at)",
                     [
                         'subcontractor_id' => $subId,
                         'name' => $empName,
                         'job_title' => $emp['job_title'],
                         'mobile' => $empMobile,
                         'email' => $empEmail,
+                        'profile_picture' => $profilePicture,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]

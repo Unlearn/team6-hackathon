@@ -6,6 +6,13 @@
 /backend/.env.*.local
 /backend/public/bundles/
 /backend/public/uploads/
+!/backend/public/uploads/profiles/andy.png
+!/backend/public/uploads/profiles/charlie.png
+!/backend/public/uploads/profiles/clea.jpg
+!/backend/public/uploads/profiles/dan.jpg
+!/backend/public/uploads/profiles/james.jpg
+!/backend/public/uploads/profiles/reegan.jpg
+!/backend/public/uploads/profiles/vari.jpg
 
 # Frontend
 /frontend/node_modules/
