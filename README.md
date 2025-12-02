@@ -8,7 +8,7 @@ A website generator built with Symfony (PHP 8.4) backend and Vue (TypeScript) fr
 - Step 1: Business Name and ABN (Australian Business Number) validation
 - Modern, responsive UI with Vue 3 SPA
 - RESTful API with Symfony
-- PostgreSQL database
+- SQLite database
 - Fully containerized with Docker
 
 ## Prerequisites
@@ -24,10 +24,9 @@ A website generator built with Symfony (PHP 8.4) backend and Vue (TypeScript) fr
 docker-compose up -d --build
 ```
 
-This will start three services:
+This will start two services:
 - **Backend** (Symfony): http://localhost:8000
 - **Frontend** (Vue): http://localhost:5173
-- **Database** (PostgreSQL): localhost:5432
 
 ### 2. Install Backend Dependencies
 
@@ -146,10 +145,7 @@ docker-compose exec frontend sh
 
 ## Database
 
-The PostgreSQL database is accessible at `localhost:5432` with:
-- **Database**: SubbieHub
-- **User**: SubbieHub
-- **Password**: SubbieHub
+The application uses SQLite with a file-based database stored at `backend/var/data.db`.
 
 ## Next Steps
 
@@ -163,5 +159,5 @@ The PostgreSQL database is accessible at `localhost:5432` with:
 
 - **Backend**: Symfony 7.1, PHP 8.4 (FPM), nginx, Doctrine ORM
 - **Frontend**: Vue 3, TypeScript, Vite, Vue Router, Axios, Tailwind CSS, shadcn-vue
-- **Database**: PostgreSQL 16
+- **Database**: SQLite
 - **Infrastructure**: Docker, Docker Compose
