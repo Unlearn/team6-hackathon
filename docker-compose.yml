@@ -1,0 +1,54 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - "8000:80"
+    environment:
+      - DATABASE_URL=postgresql://subbiehub:subbiehub@db:5432/subbiehub?serverVersion=16&charset=utf8
+      - APP_ENV=dev
+      - APP_SECRET=change_this_secret_in_production
+    depends_on:
+      - db
+    networks:
+      - subbiehub
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    networks:
+      - subbiehub
+
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      - POSTGRES_DB=subbiehub
+      - POSTGRES_USER=subbiehub
+      - POSTGRES_PASSWORD=subbiehub
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - subbiehub
+
+networks:
+  subbiehub:
+    driver: bridge
+
+volumes:
+  db_data:
