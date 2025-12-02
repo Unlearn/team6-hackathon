@@ -7,6 +7,7 @@ import WizardStep2 from './components/WizardStep2.vue'
 import WizardStep3 from './components/WizardStep3.vue'
 import WizardStep4 from './components/WizardStep4.vue'
 import GeneratedSite from './components/GeneratedSite.vue'
+import SubcontractorSearch from './components/SubcontractorSearch.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -39,6 +40,11 @@ const router = createRouter({
       path: '/site/:id',
       name: 'site',
       component: GeneratedSite
+    },
+    {
+      path: '/search',
+      name: 'search',
+      component: SubcontractorSearch
     }
   ]
 })
