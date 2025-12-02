@@ -3,9 +3,19 @@
     <div class="container mx-auto max-w-5xl">
       <header v-if="!isGeneratedSite" class="mb-12">
         <div class="flex justify-between items-center mb-8">
-          <div class="flex-1"></div>
+          <div class="flex-1 flex justify-start">
+            <router-link
+              to="/search"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border hover:bg-accent transition-colors text-sm font-medium"
+            >
+              <Search class="h-4 w-4" />
+              Find Subcontractors
+            </router-link>
+          </div>
           <div class="text-center flex-1">
-            <img src="/logo.png" alt="SubbieHub" class="h-16 mx-auto" />
+            <router-link to="/">
+              <img src="/logo.png" alt="SubbieHub" class="h-16 mx-auto" />
+            </router-link>
           </div>
           <div class="flex-1 flex justify-end">
             <ThemeToggle />
@@ -23,6 +33,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { Search } from 'lucide-vue-next'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import { useTheme } from '@/composables/useTheme'
 
