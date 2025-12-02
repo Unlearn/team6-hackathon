@@ -14,7 +14,7 @@
           </div>
           <div class="text-center flex-1">
             <router-link to="/">
-              <img src="/logo.png" alt="SubbieHub" class="h-16 mx-auto" />
+              <img src="/logo.png" alt="SubbieHub" class="h-16 mx-auto" style="filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5))" />
             </router-link>
           </div>
           <div class="flex-1 flex justify-end">
