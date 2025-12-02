@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Employee;
 use App\Entity\Subcontractor;
 use App\Entity\Trade;
 use Doctrine\ORM\EntityManagerInterface;
@@ -78,57 +79,73 @@ class WizardController extends AbstractController
         ], 200);
     }
 
-    #[Route('/step2', name: 'step2', methods: ['POST'])]
-    public function step2(Request $request): JsonResponse
-    {
-        // Step 2 just validates the data, doesn't save to DB
-        $data = json_decode($request->getContent(), true);
-
-        if (!isset($data['mobile']) || !isset($data['email'])) {
-            return $this->json([
-                'success' => false,
-                'errors' => ['mobile and email are required']
-            ], 400);
-        }
-
-        // Validate email format
-        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return $this->json([
-                'success' => false,
-                'errors' => ['email' => 'Please enter a valid email address']
-            ], 400);
-        }
-
-        return $this->json([
-            'success' => true
-        ], 200);
-    }
 
     #[Route('/step3', name: 'step3', methods: ['POST'])]
     public function step3(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        // Validate employees array
-        if (!isset($data['employees']) || !is_array($data['employees'])) {
+        // Handle employee data with profile pictures
+        $employeesData = $request->request->get('employees');
+        
+        if (!$employeesData) {
             return $this->json([
                 'success' => false,
-                'errors' => ['employees must be an array']
+                'errors' => ['At least one employee is required']
             ], 400);
         }
 
-        // Validate each employee has a name
-        foreach ($data['employees'] as $employee) {
-            if (empty($employee)) {
+        $employees = json_decode($employeesData, true);
+        
+        if (!is_array($employees) || empty($employees)) {
+            return $this->json([
+                'success' => false,
+                'errors' => ['At least one employee is required']
+            ], 400);
+        }
+
+        $hasMainContact = false;
+        foreach ($employees as $employee) {
+            if (empty($employee['name'])) {
                 return $this->json([
                     'success' => false,
-                    'errors' => ['All employee names must be filled']
+                    'errors' => ['All employees must have a name']
                 ], 400);
+            }
+            
+            if (isset($employee['isMainContact']) && $employee['isMainContact']) {
+                $hasMainContact = true;
+            }
+        }
+
+        if (!$hasMainContact) {
+            return $this->json([
+                'success' => false,
+                'errors' => ['At least one employee must be marked as main contact']
+            ], 400);
+        }
+
+        // Handle profile picture uploads
+        $profilePictures = [];
+        $files = $request->files->all();
+        
+        if (!empty($files)) {
+            $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles';
+            if (!is_dir($uploadsDirectory)) {
+                mkdir($uploadsDirectory, 0777, true);
+            }
+
+            foreach ($files as $key => $file) {
+                if (preg_match('/^profilePicture_(\d+)$/', $key, $matches)) {
+                    $index = $matches[1];
+                    $filename = uniqid() . '.' . $file->guessExtension();
+                    $file->move($uploadsDirectory, $filename);
+                    $profilePictures[$index] = $filename;
+                }
             }
         }
 
         return $this->json([
-            'success' => true
+            'success' => true,
+            'profilePictures' => $profilePictures
         ], 200);
     }
 
@@ -168,33 +185,75 @@ class WizardController extends AbstractController
         $name = $request->request->get('name');
         $abn = $request->request->get('abn');
         $logo = $request->request->get('logo');
-        $mobile = $request->request->get('mobile');
-        $email = $request->request->get('email');
-        $employees = json_decode($request->request->get('employees'), true);
+        $employeesData = json_decode($request->request->get('employees'), true);
         $tradeIds = json_decode($request->request->get('tradeIds'), true);
 
         // Validate required fields
-        if (!$name || !$abn || !$mobile || !$email || !$tradeIds) {
+        if (!$name || !$abn || !$employeesData || !$tradeIds) {
             return $this->json([
                 'success' => false,
                 'errors' => ['All fields from previous steps are required']
             ], 400);
         }
 
+        // Validate at least one main contact
+        $hasMainContact = false;
+        foreach ($employeesData as $empData) {
+            if (isset($empData['isMainContact']) && $empData['isMainContact']) {
+                $hasMainContact = true;
+                break;
+            }
+        }
+
+        if (!$hasMainContact) {
+            return $this->json([
+                'success' => false,
+                'errors' => ['At least one employee must be marked as main contact']
+            ], 400);
+        }
+
+        // Get main contact for subcontractor mobile/email
+        $mainContact = null;
+        foreach ($employeesData as $empData) {
+            if (isset($empData['isMainContact']) && $empData['isMainContact']) {
+                $mainContact = $empData;
+                break;
+            }
+        }
+
         // Create subcontractor
         $subcontractor = new Subcontractor();
         $subcontractor->setName($name);
         $subcontractor->setAbn($abn);
-        $subcontractor->setMobile($mobile);
-        $subcontractor->setEmail($email);
+        $subcontractor->setMobile($mainContact['mobile'] ?? null);
+        $subcontractor->setEmail($mainContact['email'] ?? null);
         $subcontractor->setCurrentStep(5);
 
         if ($logo) {
             $subcontractor->setLogo($logo);
         }
 
-        if ($employees) {
-            $subcontractor->setEmployees($employees);
+        // Create Employee entities and track main contact
+        $mainContactEmployee = null;
+        foreach ($employeesData as $empData) {
+            $employee = new Employee();
+            $employee->setName($empData['name']);
+            $employee->setJobTitle($empData['jobTitle'] ?? null);
+            $employee->setMobile($empData['mobile'] ?? null);
+            $employee->setEmail($empData['email'] ?? null);
+            $employee->setProfilePicture($empData['profilePicture'] ?? null);
+            
+            $subcontractor->addEmployee($employee);
+            
+            // Track the main contact employee
+            if (isset($empData['isMainContact']) && $empData['isMainContact']) {
+                $mainContactEmployee = $employee;
+            }
+        }
+        
+        // Set the main contact employee
+        if ($mainContactEmployee) {
+            $subcontractor->setMainContactEmployee($mainContactEmployee);
         }
 
         // Add trades

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Employee;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -45,8 +46,12 @@ class Subcontractor
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $documents = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $employees = null;
+    #[ORM\OneToMany(targetEntity: Employee::class, mappedBy: 'subcontractor', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $employees;
+
+    #[ORM\ManyToOne(targetEntity: Employee::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Employee $mainContactEmployee = null;
 
     #[ORM\Column(type: 'integer')]
     private int $currentStep = 1;
@@ -62,6 +67,7 @@ class Subcontractor
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->trades = new ArrayCollection();
+        $this->employees = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -183,14 +189,44 @@ class Subcontractor
         return $this;
     }
 
-    public function getEmployees(): ?array
+    /**
+     * @return Collection<int, Employee>
+     */
+    public function getEmployees(): Collection
     {
         return $this->employees;
     }
 
-    public function setEmployees(?array $employees): self
+    public function addEmployee(Employee $employee): self
     {
-        $this->employees = $employees;
+        if (!$this->employees->contains($employee)) {
+            $this->employees[] = $employee;
+            $employee->setSubcontractor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployee(Employee $employee): self
+    {
+        if ($this->employees->removeElement($employee)) {
+            // set the owning side to null (unless already changed)
+            if ($employee->getSubcontractor() === $this) {
+                $employee->setSubcontractor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getMainContactEmployee(): ?Employee
+    {
+        return $this->mainContactEmployee;
+    }
+
+    public function setMainContactEmployee(?Employee $mainContactEmployee): self
+    {
+        $this->mainContactEmployee = $mainContactEmployee;
         return $this;
     }
 }

@@ -4,48 +4,27 @@
       <CardHeader class="space-y-6 pb-8">
         <div class="space-y-3">
           <div class="flex items-center justify-between text-sm text-muted-foreground mb-2">
-            <span class="font-medium">Step 2 of 5</span>
-            <span class="font-medium">40% Complete</span>
+            <span class="font-medium">Step 2 of 4</span>
+            <span class="font-medium">50% Complete</span>
           </div>
-          <Progress :model-value="40" class="h-3" />
+          <Progress :model-value="50" class="h-3" />
         </div>
         <div class="space-y-3 pt-2">
-          <CardTitle class="text-3xl">Contact Details</CardTitle>
-          <CardDescription class="text-base">How can we reach you?</CardDescription>
+          <CardTitle class="text-3xl">What Do You Do?</CardTitle>
+          <CardDescription class="text-base">Select the trades and services you offer</CardDescription>
         </div>
       </CardHeader>
       
       <CardContent class="space-y-8 px-8 pb-8">
         <form @submit.prevent="handleSubmit" class="space-y-8">
           <div class="space-y-3">
-            <Label for="mobile" class="text-base">Mobile Number *</Label>
-            <Input
-              id="mobile"
-              v-model="formData.mobile"
-              type="tel"
-              placeholder="e.g., 0412 345 678"
-              required
-              class="h-12 text-base rounded-lg"
-              :class="{ 'border-destructive': errors.mobile }"
+            <Label class="text-base">Select Your Trades *</Label>
+            <MultiSelect
+              v-model="selectedTrades"
+              :options="availableTrades"
             />
-            <p v-if="errors.mobile" class="text-sm text-destructive mt-2">
-              {{ errors.mobile }}
-            </p>
-          </div>
-
-          <div class="space-y-3">
-            <Label for="email" class="text-base">Email Address *</Label>
-            <Input
-              id="email"
-              v-model="formData.email"
-              type="email"
-              placeholder="e.g., john@example.com"
-              required
-              class="h-12 text-base rounded-lg"
-              :class="{ 'border-destructive': errors.email }"
-            />
-            <p v-if="errors.email" class="text-sm text-destructive mt-2">
-              {{ errors.email }}
+            <p v-if="errors.trades" class="text-sm text-destructive mt-2">
+              {{ errors.trades }}
             </p>
           </div>
 
@@ -84,20 +63,23 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { AlertCircle, CheckCircle } from 'lucide-vue-next'
+import { AlertCircle } from 'lucide-vue-next'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import MultiSelect from '@/components/ui/MultiSelect.vue'
 
 const router = useRouter()
 
-const formData = ref({
-  mobile: '',
-  email: ''
-})
+interface Trade {
+  id: number
+  name: string
+}
+
+const availableTrades = ref<Trade[]>([])
+const selectedTrades = ref<Trade[]>([])
 
 const errors = ref<Record<string, string>>({})
 const submitError = ref('')
@@ -105,34 +87,31 @@ const loading = ref(false)
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-onMounted(() => {
-  // Check if step 1 is completed
+onMounted(async () => {
+  // Check if previous step is completed
   const step1Data = sessionStorage.getItem('wizardStep1')
+  
   if (!step1Data) {
     router.push('/wizard/step1')
     return
   }
   
-  // Load step 2 data if returning to this step
-  const savedData = sessionStorage.getItem('wizardStep2')
-  if (savedData) {
-    const data = JSON.parse(savedData)
-    formData.value.mobile = data.mobile || ''
-    formData.value.email = data.email || ''
+  // Fetch available trades
+  try {
+    const response = await axios.get(`${API_URL}/api/wizard/trades`)
+    if (response.data.success) {
+      availableTrades.value = response.data.trades
+    }
+  } catch (error) {
+    console.error('Failed to fetch trades:', error)
   }
 })
 
 const validateForm = (): boolean => {
   errors.value = {}
   
-  if (!formData.value.mobile.trim()) {
-    errors.value.mobile = 'Mobile number is required'
-  }
-  
-  if (!formData.value.email.trim()) {
-    errors.value.email = 'Email address is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
-    errors.value.email = 'Please enter a valid email address'
+  if (selectedTrades.value.length === 0) {
+    errors.value.trades = 'Please select at least one trade'
   }
   
   return Object.keys(errors.value).length === 0
@@ -152,18 +131,16 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
-    const response = await axios.post(`${API_URL}/api/wizard/step2`, {
-      mobile: formData.value.mobile,
-      email: formData.value.email
+    const response = await axios.post(`${API_URL}/api/wizard/step4`, {
+      tradeIds: selectedTrades.value.map(t => t.id)
     })
     
     if (response.data.success) {
       // Store step 2 data in sessionStorage
       sessionStorage.setItem('wizardStep2', JSON.stringify({
-        mobile: formData.value.mobile,
-        email: formData.value.email
+        tradeIds: selectedTrades.value.map(t => t.id)
       }))
-      // Navigate to step 3 immediately
+      // Navigate to step 3
       router.push('/wizard/step3')
     }
   } catch (error: any) {
