@@ -35,13 +35,13 @@
     </div>
     <div v-if="modelValue.length > 0" class="flex flex-wrap gap-2 mt-3">
       <div
-        v-for="selected in modelValue"
-        :key="selected.id"
+        v-for="selectedId in modelValue"
+        :key="selectedId"
         class="inline-flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm"
       >
-        <span>{{ selected.name }}</span>
+        <span>{{ getOptionName(selectedId) }}</span>
         <button
-          @click.stop="toggleOption(selected)"
+          @click.stop="removeOption(selectedId)"
           class="hover:bg-primary/80 rounded-full p-0.5"
         >
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,12 +64,12 @@ interface Trade {
 
 interface Props {
   options: Trade[]
-  modelValue: Trade[]
+  modelValue: number[]
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Trade[]): void
+  (e: 'update:modelValue', value: number[]): void
 }>()
 
 const searchQuery = ref('')
@@ -82,13 +82,21 @@ const filteredOptions = computed(() => {
 })
 
 const isSelected = (option: Trade) => {
-  return props.modelValue.some(v => v.id === option.id)
+  return props.modelValue.includes(option.id)
 }
 
 const toggleOption = (option: Trade) => {
   const newValue = isSelected(option)
-    ? props.modelValue.filter(v => v.id !== option.id)
-    : [...props.modelValue, option]
+    ? props.modelValue.filter(id => id !== option.id)
+    : [...props.modelValue, option.id]
   emit('update:modelValue', newValue)
+}
+
+const getOptionName = (id: number) => {
+  return props.options.find(opt => opt.id === id)?.name || ''
+}
+
+const removeOption = (id: number) => {
+  emit('update:modelValue', props.modelValue.filter(v => v !== id))
 }
 </script>

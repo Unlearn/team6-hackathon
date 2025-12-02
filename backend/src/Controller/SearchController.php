@@ -137,6 +137,7 @@ class SearchController extends AbstractController
             'id' => $sub->getId(),
             'name' => $sub->getName(),
             'abn' => $sub->getAbn(),
+            'slug' => $sub->getSlug(),
             'mobile' => $sub->getMobile(),
             'email' => $sub->getEmail(),
             'logo' => $sub->getLogo(),

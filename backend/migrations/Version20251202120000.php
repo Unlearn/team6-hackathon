@@ -21,6 +21,7 @@ final class Version20251202120000 extends AbstractMigration
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255) NOT NULL,
             abn VARCHAR(11) NOT NULL,
+            slug VARCHAR(255) NOT NULL DEFAULT "",
             mobile VARCHAR(20) DEFAULT NULL,
             email VARCHAR(255) DEFAULT NULL,
             logo VARCHAR(255) DEFAULT NULL,
@@ -32,6 +33,7 @@ final class Version20251202120000 extends AbstractMigration
             FOREIGN KEY (main_contact_employee_id) REFERENCES employees (id) ON DELETE SET NULL
         )');
         
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_8CCDFF28_SLUG ON subcontractors (slug)');
         $this->addSql('CREATE INDEX IDX_8CCDFF28_MAIN_CONTACT ON subcontractors (main_contact_employee_id)');
 
         // Create employees table

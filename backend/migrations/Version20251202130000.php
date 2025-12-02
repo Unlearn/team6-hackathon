@@ -62,12 +62,17 @@ final class Version20251202130000 extends AbstractMigration
         $lastNames = ['Wilson', 'Brown', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen'];
 
         foreach ($subcontractors as $index => $sub) {
+            // Generate slug from name
+            $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $sub['name']));
+            $slug = trim($slug, '-');
+            
             // Insert subcontractor
             $this->addSql(
-                "INSERT INTO subcontractors (name, abn, mobile, email, current_step, created_at, updated_at) VALUES (:name, :abn, :mobile, :email, 5, :created_at, :updated_at)",
+                "INSERT INTO subcontractors (name, abn, slug, mobile, email, current_step, created_at, updated_at) VALUES (:name, :abn, :slug, :mobile, :email, 5, :created_at, :updated_at)",
                 [
                     'name' => $sub['name'],
                     'abn' => $sub['abn'],
+                    'slug' => $slug,
                     'mobile' => $sub['mobile'],
                     'email' => $sub['email'],
                     'created_at' => $now,

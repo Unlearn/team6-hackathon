@@ -70,7 +70,7 @@
             <a
               v-for="sub in subcontractors"
               :key="sub.id"
-              :href="`/site/${sub.id}`"
+              :href="`/site/${sub.slug}`"
               class="block p-4 border rounded-lg hover:bg-accent transition-colors"
             >
               <div class="flex items-start gap-4">
@@ -159,6 +159,7 @@ interface Subcontractor {
   id: number
   name: string
   abn: string
+  slug: string
   mobile: string | null
   email: string | null
   logo: string | null
@@ -179,7 +180,7 @@ const selectedTradeIds = ref<number[]>([])
 const subcontractors = ref<Subcontractor[]>([])
 const loading = ref(false)
 const error = ref('')
-const tradeOptions = ref<{ value: number; label: string }[]>([])
+const tradeOptions = ref<Trade[]>([])
 const pagination = ref<Pagination>({
   page: 1,
   limit: 10,
@@ -242,10 +243,7 @@ const loadTrades = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/wizard/trades`)
     if (response.data.success) {
-      tradeOptions.value = response.data.trades.map((trade: Trade) => ({
-        value: trade.id,
-        label: trade.name
-      }))
+      tradeOptions.value = response.data.trades
     }
   } catch (err) {
     console.error('Failed to load trades:', err)
