@@ -215,7 +215,8 @@ const handleSubmit = async () => {
       sessionStorage.removeItem('wizardStep2')
       sessionStorage.removeItem('wizardStep3')
       
-      siteUrl.value = `${window.location.origin}/site/${response.data.id}`
+      // Redirect to the generated site
+      window.location.href = `/site/${response.data.slug}`
     }
   } catch (error: any) {
     if (error.response?.data?.errors) {

@@ -221,10 +221,22 @@ class WizardController extends AbstractController
             }
         }
 
+        // Generate unique slug from subcontractor name
+        $baseSlug = $this->generateSlug($name);
+        $slug = $baseSlug;
+        $counter = 1;
+        
+        // Check if slug exists and append number if needed
+        while ($this->entityManager->getRepository(Subcontractor::class)->findOneBy(['slug' => $slug])) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
         // Create subcontractor
         $subcontractor = new Subcontractor();
         $subcontractor->setName($name);
         $subcontractor->setAbn($abn);
+        $subcontractor->setSlug($slug);
         $subcontractor->setMobile($mainContact['mobile'] ?? null);
         $subcontractor->setEmail($mainContact['email'] ?? null);
         $subcontractor->setCurrentStep(5);
@@ -306,8 +318,23 @@ class WizardController extends AbstractController
         return $this->json([
             'success' => true,
             'id' => $subcontractor->getId(),
+            'slug' => $subcontractor->getSlug(),
             'message' => 'Subcontractor created successfully'
         ], 201);
+    }
+
+    private function generateSlug(string $text): string
+    {
+        // Convert to lowercase
+        $slug = strtolower($text);
+        
+        // Replace spaces and special characters with hyphens
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        
+        // Remove leading and trailing hyphens
+        $slug = trim($slug, '-');
+        
+        return $slug;
     }
 
 }

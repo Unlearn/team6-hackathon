@@ -29,6 +29,10 @@ class Subcontractor
     )]
     private string $abn;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Assert\NotBlank]
+    private string $slug;
+
     #[ORM\Column(type: 'string', length: 20, nullable: true)]
     private ?string $mobile = null;
 
@@ -94,6 +98,17 @@ class Subcontractor
     public function setAbn(string $abn): self
     {
         $this->abn = $abn;
+        return $this;
+    }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
         return $this;
     }
 

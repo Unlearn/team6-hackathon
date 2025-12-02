@@ -15,10 +15,15 @@ class SiteController extends AbstractController
         private EntityManagerInterface $entityManager
     ) {}
 
-    #[Route('/{id}', name: 'get_site', methods: ['GET'])]
-    public function getSite(int $id): JsonResponse
+    #[Route('/{identifier}', name: 'get_site', methods: ['GET'])]
+    public function getSite(string $identifier): JsonResponse
     {
-        $subcontractor = $this->entityManager->getRepository(Subcontractor::class)->find($id);
+        // Try to find by slug first, then by ID
+        $subcontractor = $this->entityManager->getRepository(Subcontractor::class)->findOneBy(['slug' => $identifier]);
+        
+        if (!$subcontractor && is_numeric($identifier)) {
+            $subcontractor = $this->entityManager->getRepository(Subcontractor::class)->find((int)$identifier);
+        }
 
         if (!$subcontractor) {
             return $this->json([
