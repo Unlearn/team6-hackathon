@@ -16,7 +16,7 @@
       </Alert>
     </div>
 
-    <div v-else-if="site" class="container mx-auto px-4 py-12">
+    <div v-else-if="site" class="max-w-6xl mx-auto px-4 py-12">
       <!-- Header -->
       <header class="text-center mb-16">
         <div v-if="site.logo" class="mb-6">
@@ -55,7 +55,7 @@
       </header>
 
       <!-- Services Section -->
-      <section class="max-w-4xl mx-auto mb-16">
+      <section class="mb-16">
         <Card class="shadow-xl">
           <CardHeader>
             <CardTitle class="text-3xl">Our Services</CardTitle>
@@ -78,7 +78,7 @@
       </section>
 
       <!-- Team Section -->
-      <section v-if="site.employees && site.employees.length > 0" class="max-w-6xl mx-auto mb-16">
+      <section v-if="site.employees && site.employees.length > 0" class="mb-16">
         <Card class="shadow-xl">
           <CardHeader>
             <CardTitle class="text-3xl">Our Team</CardTitle>
@@ -156,7 +156,7 @@
       </section>
 
       <!-- Documents Section -->
-      <section v-if="site.documents && site.documents.length > 0" class="max-w-4xl mx-auto mb-16">
+      <section v-if="site.documents && site.documents.length > 0" class="mb-16">
         <Card class="shadow-xl">
           <CardHeader>
             <CardTitle class="text-3xl">Compliance Documents</CardTitle>
